@@ -11,9 +11,9 @@ class App extends Component {
     return (
       <Router className="App">
         <Switch>
-          <Route exact path="/" Component={() => <Redirect to="/loading" />} />
-          <Route path="/loader" Component={Loading} />
-          <Route path="/player?" Component={Player} />
+          <Route exact path="/" component={() => <Redirect to="/loading" />} />
+          <Route exact path="/loader" component={Loading} />
+          <Route exact path="/player?" component={Player} />
         </Switch>
       </Router>
     );
