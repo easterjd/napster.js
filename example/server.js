@@ -3,8 +3,8 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var querystring = require('querystring');
 
-var apiKey = 'API_KEY';
-var apiSecret = 'API_SECRET';
+var apiKey = 'YzI4ZTZjODUtY2MxMS00YjI1LWE4MDQtMmRiYTNhOTRmOTM4';
+var apiSecret = 'MjQ5ZTI0MWMtMzgxYS00ODU3LWE4NDItOTRkMmM2OWU2YTA5';
 
 var port = 2000;
 var baseUrl = 'http://localhost:' + port;
@@ -39,7 +39,7 @@ app.get('/authorize', function(clientRequest, clientResponse) {
     }
   }, function(error, response, body) {
     body = JSON.parse(body);
-    clientResponse.redirect(baseUrl + '/client.html?' + querystring.stringify({
+    clientResponse.redirect('http://localhost:8081/' + querystring.stringify({
       accessToken: body.access_token,
       refreshToken: body.refresh_token
     }));
