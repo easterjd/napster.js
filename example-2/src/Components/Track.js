@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Card, Image } from 'semantic-ui-react'
 
 export default class Track extends Component {
     constructor(props) {
@@ -21,18 +22,28 @@ export default class Track extends Component {
 
     render() {
         return (
-            <div className="track" onClick={this.props.onClick} data-track={this.props.track.id}>
-                <div className="album-art">
-                    <img src={this.state.image}></img>
-                </div>
-                <div className="track-info">
-                    <div className="progress-bar"></div>
-                    <div className="name">{this.props.track.name}</div>
-                    <div className="artist">{this.props.track.artistName}</div>
-                    <div className="duration">{window.Napster.util.secondsToTime(this.props.track.playbackSeconds)}</div>
-                    <div className="current-time">{window.Napster.util.secondsToTime(this.props.track.playbackSeconds)}</div>
-                </div> 
-            </div>
+            <Card className="track" onClick={this.props.onClick} data-track={this.props.track.id}>
+                <Image src={this.state.image} />
+                <Card.Content>
+                <Card.Header>{this.props.track.name}</Card.Header>
+                <Card.Meta>
+                    {this.props.track.artistName}
+                </Card.Meta>
+                <Card.Description>{window.Napster.util.secondsToTime(this.props.track.playbackSeconds)}</Card.Description>
+                </Card.Content>
+            </Card>
+            // <div className="track" onClick={this.props.onClick} data-track={this.props.track.id}>
+            //     <div className="album-art">
+            //         <img src={this.state.image}></img>
+            //     </div>
+            //     <div className="track-info">
+            //         <div className="progress-bar"></div>
+            //         <div className="name">{this.props.track.name}</div>
+            //         <div className="artist">{this.props.track.artistName}</div>
+            //         <div className="duration">{window.Napster.util.secondsToTime(this.props.track.playbackSeconds)}</div>
+            //         <div className="current-time">{window.Napster.util.secondsToTime(this.props.track.playbackSeconds)}</div>
+            //     </div> 
+            // </div>
         )
     }
 }

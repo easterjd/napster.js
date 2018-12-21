@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 import { Loader } from 'semantic-ui-react'
 import auth from '../Model/auth'
+import { Grid, Container, Card } from 'semantic-ui-react'
 
 import Track from './Track'
 
@@ -123,23 +124,32 @@ export default class Player extends Component {
     render() {
         const Napster = window.Napster
         return  (
-            <div>
-                <p>Player</p>
-                <div className="header">
-                    <video id='napster-streaming-player' className='video-js'></video>
-                    <div className="header-text">napster.js Sample App<span className="user"></span></div>
-                </div>
-                <div id="tracks">
-                    <button id="next" onClick={() => this.onButton("next", Napster)}>Next</button>
-                    <button id="previous" onClick={() => this.onButton("previous", Napster)}>Previous</button>
-                    <button id="clear" onClick={() => this.onButton("clear", Napster)}>Clear</button>
-                    <button id="repeat" onClick={() => this.onButton("repeat", Napster)}>Repeat</button>
-                    <button id="shuffle" onClick={() => this.onButton("shuffle", Napster)}>Shuffle</button>
-                    <button id="pause" onClick={() => this.onButton("pause", Napster)}>Pause</button>
-                    <button id="resume" onClick={() => this.onButton("resume", Napster)}>Resume</button>
-                    {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
-                </div>
-            </div>
+
+                <Grid divided inverted padded>
+                    <Grid.Row>
+                        <Grid.Column width={4} floated="left">
+                            <h3>Player</h3>
+                            <div className="header">
+                                <video id='napster-streaming-player' className='video-js'></video>
+                                <div className="header-text">napster.js Sample App<span className="user"></span></div>
+                            </div>
+                            <button id="next" onClick={() => this.onButton("next", Napster)}>Next</button>
+                            <button id="previous" onClick={() => this.onButton("previous", Napster)}>Previous</button>
+                            <button id="clear" onClick={() => this.onButton("clear", Napster)}>Clear</button>
+                            <button id="repeat" onClick={() => this.onButton("repeat", Napster)}>Repeat</button>
+                            <button id="shuffle" onClick={() => this.onButton("shuffle", Napster)}>Shuffle</button>
+                            <button id="pause" onClick={() => this.onButton("pause", Napster)}>Pause</button>
+                            <button id="resume" onClick={() => this.onButton("resume", Napster)}>Resume</button>
+                        </Grid.Column>
+                        <Grid.Column width={10} floated="right">
+                            <Card.Group itemsPerRow={4}>
+                                {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
+                            </Card.Group>
+                            
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+
             
         )
     }
