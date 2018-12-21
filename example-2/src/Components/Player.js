@@ -89,20 +89,19 @@ export default class Player extends Component {
         console.log(Napster.player)
         switch (cmd) {
             case "next":
-                Napster.player.next()
+                return Napster.player.next()
             case "previous":
-                Napster.player.previous()
+                return Napster.player.previous()
             case "clear":
-                Napster.player.clearQueue()
+                return Napster.player.clearQueue()
             case "repeat":
-                Napster.player.toggleRepeat()
+                return Napster.player.toggleRepeat()
             case "shuffle":
-                Napster.player.toggleShuffle()
+                return Napster.player.toggleShuffle()
             case "pause":
-                Napster.player.paused = !Napster.player.paused
-                Napster.player.playing = !Napster.player.playing
+                return Napster.player.pause()
             case "resume":
-                Napster.player.resume()
+                return Napster.player.resume()
         }
     }
 
@@ -110,13 +109,13 @@ export default class Player extends Component {
         var id = track.id.charAt(0).toUpperCase() + track.id.slice(1);
         //TODO: make everything downcase this is a hack so i can debug my queue stuff
         if (Napster.player.currentTrack === id) {
-            Napster.player.playing ? Napster.player.pause() : Napster.player.resume(id);
+            return Napster.player.playing ? Napster.player.pause() : Napster.player.resume(id);
         }
         else {
             // $('[data-track="' + id + '"] .progress-bar').width(0);
             // $('[data-track="' + id + '"] .current-time').html($('[data-track="' + id + '"] .duration').html());
-            Napster.player.queue(id);
-            Napster.player.play(id);
+            // Napster.player.queue(id);
+            return Napster.player.play(id);
         }
         console.log(Napster.player)
     }
