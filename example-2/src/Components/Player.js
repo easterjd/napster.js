@@ -40,6 +40,7 @@ export default class Player extends Component {
             const Napster = window.Napster
             const $ = window.$
             var currentTrack;
+            console.log('Napster created')
             Napster.init({ consumerKey: 'YzI4ZTZjODUtY2MxMS00YjI1LWE4MDQtMmRiYTNhOTRmOTM4', isHTML5Compatible: true });
     
             Napster.player.on('ready', async (e) => {
@@ -64,8 +65,8 @@ export default class Player extends Component {
               var paused = e.data.paused;
               var currentTrack = e.data.id;
     
-              $('[data-track]').removeClass('playing paused');
-              $('[data-track="' + currentTrack + '"]').toggleClass('playing', playing).toggleClass('paused', paused);
+            //   $('[data-track]').removeClass('playing paused');
+            //   $('[data-track="' + currentTrack + '"]').toggleClass('playing', playing).toggleClass('paused', paused);
             });
     
             Napster.player.on('playtimer', function(e) {
@@ -74,9 +75,9 @@ export default class Player extends Component {
               var total = e.data.totalTime;
               var width = $("[data-track='" + id + "'] .track-info").width();
     
-              $("[data-track='" + id + "']").addClass("playing");
-              $("[data-track='" + id + "'] .progress-bar").width(parseInt((current / total) * width).toString() + "px");
-              $("[data-track='" + id + "'] .current-time").html(Napster.util.secondsToTime(total - current));
+            //   $("[data-track='" + id + "']").addClass("playing");
+            //   $("[data-track='" + id + "'] .progress-bar").width(parseInt((current / total) * width).toString() + "px");
+            //   $("[data-track='" + id + "'] .current-time").html(Napster.util.secondsToTime(total - current));
             });
     
             Napster.player.on('error', console.log);
@@ -85,6 +86,7 @@ export default class Player extends Component {
 
     onButton = (cmd) => {
         const Napster = window.Napster
+        console.log(Napster.player)
         switch (cmd) {
             case "next":
                 Napster.player.next()
@@ -97,7 +99,8 @@ export default class Player extends Component {
             case "shuffle":
                 Napster.player.toggleShuffle()
             case "pause":
-                Napster.player.pause()
+                Napster.player.paused = !Napster.player.paused
+                Napster.player.playing = !Napster.player.playing
             case "resume":
                 Napster.player.resume()
         }
@@ -111,14 +114,16 @@ export default class Player extends Component {
                     <video id='napster-streaming-player' className='video-js'></video>
                     <div className="header-text">napster.js Sample App<span className="user"></span></div>
                 </div>
-                <button id="next" onClick={() => this.onButton("next")}>Next</button>
-                <button id="previous" onClick={() => this.onButton("previous")}>Previous</button>
-                <button id="clear" onClick={() => this.onButton("clear")}>Clear</button>
-                <button id="repeat" onClick={() => this.onButton("repeat")}>Repeat</button>
-                <button id="shuffle" onClick={() => this.onButton("shuffle")}>Shuffle</button>
-                <button id="pause" onClick={() => this.onButton("pause")}>Pause</button>
-                <button id="resume" onClick={() => this.onButton("resume")}>Resume</button>
-                <div id="tracks">{this.state.tracks.map( (track, i) => <Track key={i} track={track} Napster={window.Napster} />)}</div>
+                <div id="tracks">
+                    <button id="next" onClick={() => this.onButton("next")}>Next</button>
+                    <button id="previous" onClick={() => this.onButton("previous")}>Previous</button>
+                    <button id="clear" onClick={() => this.onButton("clear")}>Clear</button>
+                    <button id="repeat" onClick={() => this.onButton("repeat")}>Repeat</button>
+                    <button id="shuffle" onClick={() => this.onButton("shuffle")}>Shuffle</button>
+                    <button id="pause" onClick={() => this.onButton("pause")}>Pause</button>
+                    <button id="resume" onClick={() => this.onButton("resume")}>Resume</button>
+                    {this.state.tracks.map( (track, i) => <Track key={i} track={track} />)}
+                </div>
             </div>
             
         )
