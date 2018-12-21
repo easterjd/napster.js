@@ -26,6 +26,5 @@
     "maintained node versions",
     "not dead"
   ],
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

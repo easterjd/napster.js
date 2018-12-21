@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 import { Loader } from 'semantic-ui-react'
-import auth from '../Model/auth'
+import init from '../Model/auth'
 
 export default class Loading extends Component {
     constructor(props) {
@@ -13,7 +13,7 @@ export default class Loading extends Component {
     }
 
     async componentDidMount() {
-        // await auth.init()
+        await init()
     }
 
     render() {

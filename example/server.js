@@ -39,7 +39,7 @@ app.get('/authorize', function(clientRequest, clientResponse) {
     }
   }, function(error, response, body) {
     body = JSON.parse(body);
-    clientResponse.redirect('http://localhost:8081/' + querystring.stringify({
+    clientResponse.redirect('http://localhost:3000/player?' + querystring.stringify({
       accessToken: body.access_token,
       refreshToken: body.refresh_token
     }));
