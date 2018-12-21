@@ -18,24 +18,10 @@ export default class Track extends Component {
         })
     }
 
-    onClick = (track, Napster) => {
-        var id = track.id.charAt(0).toUpperCase() + track.id.slice(1);
-        //TODO: make everything downcase this is a hack so i can debug my queue stuff
-        if (Napster.player.currentTrack === id) {
-            Napster.player.playing ? Napster.player.pause() : Napster.player.resume(id);
-        }
-        else {
-            // $('[data-track="' + id + '"] .progress-bar').width(0);
-            // $('[data-track="' + id + '"] .current-time').html($('[data-track="' + id + '"] .duration').html());
-            Napster.player.queue(id);
-            Napster.player.play(id);
-        }
-        console.log(Napster.player)
-    }
 
     render() {
         return (
-            <div className="track" onClick={() => this.onClick(this.props.track, window.Napster)} data-track={this.props.track.id}>
+            <div className="track" onClick={this.props.onClick} data-track={this.props.track.id}>
                 <div className="album-art">
                     <img src={this.state.image}></img>
                 </div>

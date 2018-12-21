@@ -84,8 +84,7 @@ export default class Player extends Component {
         })
     }
 
-    onButton = (cmd) => {
-        const Napster = window.Napster
+    onButton = (cmd, Napster) => {
         console.log(Napster.player)
         switch (cmd) {
             case "next":
@@ -106,7 +105,23 @@ export default class Player extends Component {
         }
     }
 
+    onClick = (track, Napster) => {
+        var id = track.id.charAt(0).toUpperCase() + track.id.slice(1);
+        //TODO: make everything downcase this is a hack so i can debug my queue stuff
+        if (Napster.player.currentTrack === id) {
+            Napster.player.playing ? Napster.player.pause() : Napster.player.resume(id);
+        }
+        else {
+            // $('[data-track="' + id + '"] .progress-bar').width(0);
+            // $('[data-track="' + id + '"] .current-time').html($('[data-track="' + id + '"] .duration').html());
+            Napster.player.queue(id);
+            Napster.player.play(id);
+        }
+        console.log(Napster.player)
+    }
+
     render() {
+        const Napster = window.Napster
         return  (
             <div>
                 <p>Player</p>
@@ -115,14 +130,14 @@ export default class Player extends Component {
                     <div className="header-text">napster.js Sample App<span className="user"></span></div>
                 </div>
                 <div id="tracks">
-                    <button id="next" onClick={() => this.onButton("next")}>Next</button>
-                    <button id="previous" onClick={() => this.onButton("previous")}>Previous</button>
-                    <button id="clear" onClick={() => this.onButton("clear")}>Clear</button>
-                    <button id="repeat" onClick={() => this.onButton("repeat")}>Repeat</button>
-                    <button id="shuffle" onClick={() => this.onButton("shuffle")}>Shuffle</button>
-                    <button id="pause" onClick={() => this.onButton("pause")}>Pause</button>
-                    <button id="resume" onClick={() => this.onButton("resume")}>Resume</button>
-                    {this.state.tracks.map( (track, i) => <Track key={i} track={track} />)}
+                    <button id="next" onClick={() => this.onButton("next", Napster)}>Next</button>
+                    <button id="previous" onClick={() => this.onButton("previous", Napster)}>Previous</button>
+                    <button id="clear" onClick={() => this.onButton("clear", Napster)}>Clear</button>
+                    <button id="repeat" onClick={() => this.onButton("repeat", Napster)}>Repeat</button>
+                    <button id="shuffle" onClick={() => this.onButton("shuffle", Napster)}>Shuffle</button>
+                    <button id="pause" onClick={() => this.onButton("pause", Napster)}>Pause</button>
+                    <button id="resume" onClick={() => this.onButton("resume", Napster)}>Resume</button>
+                    {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
                 </div>
             </div>
             
