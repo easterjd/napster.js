@@ -31,87 +31,34 @@ export default class Player extends Component {
           });
         }
         this.setState({
+            ...this.state,
             ...parameters
         })
     }
 
-    async temp({ accessToken, refreshToken }) {
+    temp = async ({ accessToken, refreshToken }) => {
             const Napster = window.Napster
             const $ = window.$
             var currentTrack;
             Napster.init({ consumerKey: 'YzI4ZTZjODUtY2MxMS00YjI1LWE4MDQtMmRiYTNhOTRmOTM4', isHTML5Compatible: true });
     
-            Napster.player.on('ready', function(e) {
+            Napster.player.on('ready', async (e) => {
               // Uncomment to know when The Napster Player is ready
               console.log('initialized');
     
               if (accessToken) {
                 Napster.member.set({accessToken, refreshToken});
               }
-    
-              Napster.api.get(false, '/tracks/top', function(data) {
-                var tracks = data.tracks;
-                var appendTracks = tracks.map( track => <Track track={track} Napster={Napster} />)
-                Napster.player.clearQueue();
-                tracks.forEach(function(track, i) {
-                  var $t = $('<div class="track" data-track="' + track.id + '">' +
-                               '<div class="album-art"></div>' +
-                               '<div class="track-info">' +
-                                 '<div class="progress-bar"></div>' +
-                                 '<div class="name">' + track.name + '</div>' +
-                                 '<div class="artist">' + track.artistName + '</div>' +
-                                 '<div class="duration">' + Napster.util.secondsToTime(track.playbackSeconds) + '</div>' +
-                                 '<div class="current-time">' + Napster.util.secondsToTime(track.playbackSeconds) + '</div>' +
-                               '</div>' +
-                              '</div>');
-    
-                  $t.click(function() {
-                    var id = track.id.charAt(0).toUpperCase() + track.id.slice(1);
-                    //TODO: make everything downcase this is a hack so i can debug my queue stuff
-                    if (Napster.player.currentTrack === id) {
-                      Napster.player.playing ? Napster.player.pause() : Napster.player.resume(id);
-                    }
-                    else {
-                      $('[data-track="' + id + '"] .progress-bar').width(0);
-                      $('[data-track="' + id + '"] .current-time').html($('[data-track="' + id + '"] .duration').html());
-    
-                      Napster.player.play(id);
-                    }
-                  });
-    
-                  $t.appendTo('#tracks');
-                  Napster.player.queue(track.id.charAt(0).toUpperCase() + track.id.slice(1));
-    
-                  Napster.api.get(false, '/albums/' + track.albumId + '/images', function(data) {
-                    var images = data.images;
-                    $('[data-track="' + track.id + '"] .album-art')
-                      .append($('<img>', { src: images[0].url }));
-                  });
+            
+                await Napster.api.get(false, '/tracks/top', async (data) =>{
+                    await Napster.player.clearQueue();
+                    this.setState({
+                        // ...this.state,
+                        tracks: data.tracks
+                    })
                 });
-              });
-            });
+                
     
-            $( "#next" ).click(function() {
-              Napster.player.next();
-            });
-            $( "#previous" ).click(function() {
-              Napster.player.previous();
-            });
-            $( "#clear" ).click(function() {
-              Napster.player.clearQueue();
-            });
-            $( "#repeat" ).click(function() {
-              Napster.player.toggleRepeat();
-            });
-            $( "#shuffle" ).click(function() {
-              Napster.player.toggleShuffle();
-            });
-            $( "#pause" ).click(function() {
-              Napster.player.pause();
-            });
-            $( "#resume" ).click(function() {
-              Napster.player.resume();
-            });
             Napster.player.on('playevent', function(e) {
               var playing = e.data.playing;
               var paused = e.data.paused;
@@ -133,6 +80,27 @@ export default class Player extends Component {
             });
     
             Napster.player.on('error', console.log);
+        })
+    }
+
+    onButton = (cmd) => {
+        const Napster = window.Napster
+        switch (cmd) {
+            case "next":
+                Napster.player.next()
+            case "previous":
+                Napster.player.previous()
+            case "clear":
+                Napster.player.clearQueue()
+            case "repeat":
+                Napster.player.toggleRepeat()
+            case "shuffle":
+                Napster.player.toggleShuffle()
+            case "pause":
+                Napster.player.pause()
+            case "resume":
+                Napster.player.resume()
+        }
     }
 
     render() {
@@ -143,14 +111,14 @@ export default class Player extends Component {
                     <video id='napster-streaming-player' className='video-js'></video>
                     <div className="header-text">napster.js Sample App<span className="user"></span></div>
                 </div>
-                <button id="next">Next</button>
-                <button id="previous">Previous</button>
-                <button id="clear">Clear</button>
-                <button id="repeat">Repeat</button>
-                <button id="shuffle">Shuffle</button>
-                <button id="pause">Pause</button>
-                <button id="resume">Resume</button>
-                <div id="tracks"></div>
+                <button id="next" onClick={() => this.onButton("next")}>Next</button>
+                <button id="previous" onClick={() => this.onButton("previous")}>Previous</button>
+                <button id="clear" onClick={() => this.onButton("clear")}>Clear</button>
+                <button id="repeat" onClick={() => this.onButton("repeat")}>Repeat</button>
+                <button id="shuffle" onClick={() => this.onButton("shuffle")}>Shuffle</button>
+                <button id="pause" onClick={() => this.onButton("pause")}>Pause</button>
+                <button id="resume" onClick={() => this.onButton("resume")}>Resume</button>
+                <div id="tracks">{this.state.tracks.map( (track, i) => <Track key={i} track={track} Napster={window.Napster} />)}</div>
             </div>
             
         )
