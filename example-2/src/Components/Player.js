@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
-import { Redirect } from 'react-router-dom'
-import { Loader } from 'semantic-ui-react'
-import auth from '../Model/auth'
-import { Grid, Container, Card, Button } from 'semantic-ui-react'
+import { Grid, Card, Button, Visibility, Sticky } from 'semantic-ui-react'
 
 import Track from './Track'
+
+// Next Steps:
+// -Impliment Redux to pass track information to Player and display current track
+// -Impliment progress bar for each track
+// -Impliment redirect to login when tokens expire
 
 export default class Player extends Component {
     constructor(props) {
@@ -15,13 +17,28 @@ export default class Player extends Component {
             tracks: [],
             playing: false,
             shuffle: false,
-            repeat: false
+            repeat: false,
+            calculations: {
+                direction: 'none',
+                height: 0,
+                width: 0,
+                topPassed: false,
+                bottomPassed: false,
+                pixelsPassed: 0,
+                percentagePassed: 0,
+                topVisible: false,
+                bottomVisible: false,
+                fits: false,
+                passing: false,
+                onScreen: false,
+                offScreen: false,
+              }
         }
     }
 
     async componentDidMount() {
         await this.getParams()
-        await this.temp(this.state)
+        await this.init(this.state)
     }
 
     getParams() {
@@ -35,15 +52,12 @@ export default class Player extends Component {
           });
         }
         this.setState({
-            ...this.state,
             ...parameters
         })
     }
 
-    temp = async ({ accessToken, refreshToken }) => {
+    init = async ({ accessToken, refreshToken }) => {
             const Napster = window.Napster
-            const $ = window.$
-            var currentTrack;
             console.log('Napster created')
             Napster.init({ consumerKey: 'YzI4ZTZjODUtY2MxMS00YjI1LWE4MDQtMmRiYTNhOTRmOTM4', isHTML5Compatible: true });
     
@@ -58,39 +72,17 @@ export default class Player extends Component {
                 await Napster.api.get(false, '/tracks/top', async (data) =>{
                     await Napster.player.clearQueue();
                     this.setState({
-                        // ...this.state,
                         tracks: data.tracks
                     })
                 });
                 
             // Would love to reformat playevent and playtimer to implement a progress bar
-
-            Napster.player.on('playevent', function(e) {
-              var playing = e.data.playing;
-              var paused = e.data.paused;
-              var currentTrack = e.data.id;
-    
-            //   $('[data-track]').removeClass('playing paused');
-            //   $('[data-track="' + currentTrack + '"]').toggleClass('playing', playing).toggleClass('paused', paused);
-            });
-    
-            Napster.player.on('playtimer', function(e) {
-              var id = currentTrack;
-              var current = e.data.currentTime;
-              var total = e.data.totalTime;
-              var width = $("[data-track='" + id + "'] .track-info").width();
-    
-            //   $("[data-track='" + id + "']").addClass("playing");
-            //   $("[data-track='" + id + "'] .progress-bar").width(parseInt((current / total) * width).toString() + "px");
-            //   $("[data-track='" + id + "'] .current-time").html(Napster.util.secondsToTime(total - current));
-            });
     
             Napster.player.on('error', console.log);
         })
     }
 
     onButton = (cmd, Napster) => {
-        console.log(Napster.player)
         switch (cmd) {
             // Next and Previous behave very erraticly and break the play button coloring; look into
             case "next":
@@ -121,12 +113,13 @@ export default class Player extends Component {
             case "resume":
                 this.setState({ playing: true })
                 return Napster.player.resume()
+            default:
+                return
         }
     }
 
     onClick = (track, Napster) => {
         var id = track.id.charAt(0).toUpperCase() + track.id.slice(1);
-        //TODO: make everything downcase this is a hack so i can debug my queue stuff
         if (Napster.player.currentTrack === id) {
             if (Napster.player.playing) {
                 this.setState({ playing: false })
@@ -137,21 +130,24 @@ export default class Player extends Component {
             }
         }
         else {
-            // $('[data-track="' + id + '"] .progress-bar').width(0);
-            // $('[data-track="' + id + '"] .current-time').html($('[data-track="' + id + '"] .duration').html());
-            // Napster.player.queue(id);
             this.setState({ playing: true })
             return Napster.player.play(id);
         }
-        console.log(Napster.player)
     }
+
+    handleContextRef = contextRef => this.setState({ contextRef })
+
+    handleUpdate = (e, { calculations }) => this.setState({ calculations })
 
     render() {
         const Napster = window.Napster
+        const { contextRef } = this.state
         return  (
-            <Grid divided inverted padded>
+            <div ref={this.handleContextRef}>
+            <Grid divided inverted padded style={style.page}>
                 <Grid.Row verticalAlign="top" textAlign="center">
                     <Grid.Column width={6} floated="left" style={style.body}>
+                    <Sticky context={contextRef}>
                         <div>
                             <h3>Player</h3>
                             <div className="header" style={style.headerText}>
@@ -159,6 +155,7 @@ export default class Player extends Component {
                                 <div className="header-text">napster.js Sample App<span className="user"></span></div>
                             </div>
                         </div>
+                        { /* Would love to impliment "Current Track" image and progress bar here */ }
                         <div style={style.buttons}>
                             <Button size="huge" circular color="grey" icon="step backward" id="previous" onClick={() => this.onButton("previous", Napster)} />
                             { this.state.playing ? 
@@ -172,27 +169,38 @@ export default class Player extends Component {
                             <Button circular color={this.state.repeat ? "orange" : "grey"} icon="sync" id="repeat" onClick={() => this.onButton("repeat", Napster)}/>
                             <Button circular color={this.state.shuffle ? "orange" : "grey"} icon="random" id="shuffle" onClick={() => this.onButton("shuffle", Napster)}/>
                         </div>
+                    </Sticky>
+                        
                     </Grid.Column>
                     <Grid.Column width={10} floated="right" style={style.body}>
-                        <Card.Group itemsPerRow={4}>
-                            {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
-                        </Card.Group>
+                        
+                        <Visibility onUpdate={this.handleUpdate}>
+                            <Card.Group itemsPerRow={4}>
+                                {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
+                            </Card.Group>
+                        </Visibility>
+
                     </Grid.Column>
                 </Grid.Row>
             </Grid>
+            </div>
         )
     }
 }
 
 const style = {
+    page: {
+        backgroundColor: "#232323"
+    },
     body: {
-        fontFamily: "'Helvetica Neue', Helvetica, sans-serif"
+        fontFamily: "'Helvetica Neue', Helvetica, sans-serif",
+        color: "white"
     },
     headerText: {
         fontWeight: "100",
         fontSize: "50px",
-        color: "#31404d",
-        paddingBottom: "25px"
+        paddingBottom: "25px",
+        color: "white"
     }, 
     napsterStreamingPlayer: {
         marginBottom: "900px"
