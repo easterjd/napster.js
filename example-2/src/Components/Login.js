@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
 import { Container } from 'semantic-ui-react'
 
+// Next Steps:
+// -Make this page match the theme of the player
+
 export default class Login extends Component {
     render() {
         return  (
