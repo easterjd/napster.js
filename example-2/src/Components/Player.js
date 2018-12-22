@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 import { Loader } from 'semantic-ui-react'
 import auth from '../Model/auth'
-import { Grid, Container, Card } from 'semantic-ui-react'
+import { Grid, Container, Card, Button } from 'semantic-ui-react'
 
 import Track from './Track'
 
@@ -12,7 +12,10 @@ export default class Player extends Component {
         this.state = {
             accessToken: null,
             refreshToken: null,
-            tracks: []
+            tracks: [],
+            playing: false,
+            shuffle: false,
+            repeat: false
         }
     }
 
@@ -60,7 +63,8 @@ export default class Player extends Component {
                     })
                 });
                 
-    
+            // Would love to reformat playevent and playtimer to implement a progress bar
+
             Napster.player.on('playevent', function(e) {
               var playing = e.data.playing;
               var paused = e.data.paused;
@@ -88,19 +92,34 @@ export default class Player extends Component {
     onButton = (cmd, Napster) => {
         console.log(Napster.player)
         switch (cmd) {
+            // Next and Previous behave very erraticly and break the play button coloring; look into
             case "next":
+                this.setState({ playing: false })
                 return Napster.player.next()
             case "previous":
+                this.setState({ playing: true })
                 return Napster.player.previous()
             case "clear":
+                this.setState({
+                    shuffle: false,
+                    repeat: false
+                })
                 return Napster.player.clearQueue()
             case "repeat":
+                this.setState({
+                    repeat: !this.state.repeat
+                })
                 return Napster.player.toggleRepeat()
             case "shuffle":
+                this.setState({
+                    shuffle: !this.state.shuffle
+                })
                 return Napster.player.toggleShuffle()
             case "pause":
+                this.setState({ playing: false })
                 return Napster.player.pause()
             case "resume":
+                this.setState({ playing: true })
                 return Napster.player.resume()
         }
     }
@@ -109,12 +128,19 @@ export default class Player extends Component {
         var id = track.id.charAt(0).toUpperCase() + track.id.slice(1);
         //TODO: make everything downcase this is a hack so i can debug my queue stuff
         if (Napster.player.currentTrack === id) {
-            return Napster.player.playing ? Napster.player.pause() : Napster.player.resume(id);
+            if (Napster.player.playing) {
+                this.setState({ playing: false })
+                return Napster.player.pause()
+            } else if (!Napster.player.playing) {
+                this.setState({ playing: true })
+                return Napster.player.resume(id)
+            }
         }
         else {
             // $('[data-track="' + id + '"] .progress-bar').width(0);
             // $('[data-track="' + id + '"] .current-time').html($('[data-track="' + id + '"] .duration').html());
             // Napster.player.queue(id);
+            this.setState({ playing: true })
             return Napster.player.play(id);
         }
         console.log(Napster.player)
@@ -123,33 +149,55 @@ export default class Player extends Component {
     render() {
         const Napster = window.Napster
         return  (
-
-                <Grid divided inverted padded>
-                    <Grid.Row>
-                        <Grid.Column width={4} floated="left">
+            <Grid divided inverted padded>
+                <Grid.Row verticalAlign="top" textAlign="center">
+                    <Grid.Column width={6} floated="left" style={style.body}>
+                        <div>
                             <h3>Player</h3>
-                            <div className="header">
-                                <video id='napster-streaming-player' className='video-js'></video>
+                            <div className="header" style={style.headerText}>
+                                <video id='napster-streaming-player' className='video-js' style={style.napsterStreamingPlayer}></video>
                                 <div className="header-text">napster.js Sample App<span className="user"></span></div>
                             </div>
-                            <button id="next" onClick={() => this.onButton("next", Napster)}>Next</button>
-                            <button id="previous" onClick={() => this.onButton("previous", Napster)}>Previous</button>
-                            <button id="clear" onClick={() => this.onButton("clear", Napster)}>Clear</button>
-                            <button id="repeat" onClick={() => this.onButton("repeat", Napster)}>Repeat</button>
-                            <button id="shuffle" onClick={() => this.onButton("shuffle", Napster)}>Shuffle</button>
-                            <button id="pause" onClick={() => this.onButton("pause", Napster)}>Pause</button>
-                            <button id="resume" onClick={() => this.onButton("resume", Napster)}>Resume</button>
-                        </Grid.Column>
-                        <Grid.Column width={10} floated="right">
-                            <Card.Group itemsPerRow={4}>
-                                {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
-                            </Card.Group>
-                            
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-
-            
+                        </div>
+                        <div style={style.buttons}>
+                            <Button size="huge" circular color="grey" icon="step backward" id="previous" onClick={() => this.onButton("previous", Napster)} />
+                            { this.state.playing ? 
+                            <Button size="massive" circular color="orange" icon="pause" id="pause" onClick={() => this.onButton("pause", Napster)}/> : 
+                            <Button size="massive" circular color="grey" icon="play" id="resume" onClick={() => this.onButton("resume", Napster)}/>
+                            }
+                            <Button size="huge" circular color="grey" icon="step forward" id="next" onClick={() => this.onButton("next", Napster)} />
+                        </div>
+                        <div>
+                            <Button circular color="grey" icon="stop" id="clear" onClick={() => this.onButton("clear", Napster)}/>
+                            <Button circular color={this.state.repeat ? "orange" : "grey"} icon="sync" id="repeat" onClick={() => this.onButton("repeat", Napster)}/>
+                            <Button circular color={this.state.shuffle ? "orange" : "grey"} icon="random" id="shuffle" onClick={() => this.onButton("shuffle", Napster)}/>
+                        </div>
+                    </Grid.Column>
+                    <Grid.Column width={10} floated="right" style={style.body}>
+                        <Card.Group itemsPerRow={4}>
+                            {this.state.tracks.map( (track, i) => <Track key={i} track={track} onClick={() => this.onClick(track, Napster)} />)}
+                        </Card.Group>
+                    </Grid.Column>
+                </Grid.Row>
+            </Grid>
         )
+    }
+}
+
+const style = {
+    body: {
+        fontFamily: "'Helvetica Neue', Helvetica, sans-serif"
+    },
+    headerText: {
+        fontWeight: "100",
+        fontSize: "50px",
+        color: "#31404d",
+        paddingBottom: "25px"
+    }, 
+    napsterStreamingPlayer: {
+        marginBottom: "900px"
+    },
+    buttons: {
+        paddingBottom: "15px"
     }
 }
