@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer'
-const apiKey = 'NjE5ODVhZmYtODFmZi00OTQwLTg0YzMtOGE5ZWYwN2E5Njhm';
-const apiSecret = 'MDMwYzM2MmEtMThmZi00YmIyLWE1ZDktY2ZiZWJlMTNkZDFk';
-const encodedCreds = Buffer.from(`${apiKey}:${apiSecret}`).toString('base64');
+const API_KEY = "NjE5ODVhZmYtODFmZi00OTQwLTg0YzMtOGE5ZWYwN2E5Njhm";
+const API_SECRET = "MDMwYzM2MmEtMThmZi00YmIyLWE1ZDktY2ZiZWJlMTNkZDFk";
+const encodedCreds = Buffer.from(`${API_KEY}:${API_SECRET}`).toString('base64');
 
 const Auth = {};
 
